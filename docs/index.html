@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0c0d11">
+<title>Cals</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0c0d11;
+  --s1:        #14151c;
+  --s2:        #1b1d26;
+  --s3:        #222535;
+  --bd:        #252836;
+  --tx:        #eef0f7;
+  --mt:        #525770;
+  --dm:        #383d52;
+
+  --cb:  #fbbf24;
+  --cl:  #34d399;
+  --cd:  #fb923c;
+  --cs:  #c084fc;
+  --cw:  #22d3ee;
+
+  --cb-a: rgba(251,191,36,.13);
+  --cl-a: rgba(52,211,153,.13);
+  --cd-a: rgba(251,146,60,.13);
+  --cs-a: rgba(192,132,252,.13);
+  --cw-a: rgba(34,211,238,.13);
+
+  --st: env(safe-area-inset-top,    20px);
+  --sb: env(safe-area-inset-bottom, 10px);
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-family:'Manrope',sans-serif;font-size:15px;-webkit-font-smoothing:antialiased}
+
+/* ── LAYOUT ──────────────────────────────── */
+#app{height:100%;display:flex;flex-direction:column;padding-top:max(var(--st),16px)}
+#header{flex-shrink:0;padding:0 16px 10px}
+#scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2px 16px calc(var(--sb) + 16px)}
+#scroll::-webkit-scrollbar{display:none}
+
+/* ── DATE NAV ────────────────────────────── */
+.drow{display:flex;align-items:center;gap:8px}
+.nbtn{flex-shrink:0;width:44px;height:44px;display:flex;align-items:center;justify-content:center;background:var(--s1);border:1px solid var(--bd);border-radius:14px;color:var(--tx);font-size:22px;cursor:pointer;touch-action:manipulation;user-select:none;transition:background .1s}
+.nbtn:active{background:var(--s2)}
+.dctr{flex:1;min-width:0;text-align:center;cursor:pointer;touch-action:manipulation;user-select:none;padding:6px 0}
+.dmain{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dsub{font-size:11px;font-weight:600;color:var(--mt);text-transform:uppercase;letter-spacing:.1em;margin-top:1px;min-height:14px}
+
+/* ── TOTAL CARD ──────────────────────────── */
+.tcard{margin-top:10px;background:var(--s1);border:1px solid var(--bd);border-radius:20px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between}
+.tnum{font-family:'Syne',sans-serif;font-size:38px;font-weight:800;letter-spacing:-.03em;line-height:1;transition:color .3s}
+.tlbl{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.1em;margin-top:4px}
+.tbd{text-align:right;font-size:12px;font-weight:600;line-height:1.9}
+
+/* ── SECTION CARD ────────────────────────── */
+.scard{background:var(--s1);border:1px solid var(--bd);border-radius:20px;margin-bottom:10px;overflow:hidden}
+.shead{display:flex;align-items:center;padding:12px 14px;gap:10px;cursor:pointer;touch-action:manipulation;user-select:none}
+.sico{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sname{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;flex:1;letter-spacing:.01em}
+.stot{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex-shrink:0}
+.schev{font-size:9px;color:var(--dm);margin-left:6px;transition:transform .22s;flex-shrink:0}
+.schev.open{transform:rotate(90deg)}
+.sbody{overflow:hidden;max-height:2000px;transition:max-height .28s ease}
+.sbody.closed{max-height:0}
+.sdiv{height:1px;background:var(--bd);margin:0 14px}
+
+/* ── ENTRIES ─────────────────────────────── */
+.erow{display:flex;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bd)}
+.ename{flex:1;min-width:0;font-size:14px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-right:8px}
+.ecals{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex-shrink:0;margin-right:10px}
+.dbtn{width:28px;height:28px;flex-shrink:0;border-radius:8px;background:transparent;border:1px solid var(--bd);color:var(--mt);font-size:12px;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;transition:border-color .15s,color .15s}
+.dbtn:active{border-color:#ef4444;color:#ef4444}
+.emsg{padding:11px 14px;font-size:13px;color:var(--mt);font-style:italic;border-bottom:1px solid var(--bd)}
+.addrow{padding:10px 14px}
+.addbtn{width:100%;height:42px;background:transparent;border:1.5px dashed var(--bd);border-radius:12px;color:var(--mt);font-family:'Manrope',sans-serif;font-size:13px;font-weight:600;cursor:pointer;touch-action:manipulation;display:flex;align-items:center;justify-content:center;gap:7px;transition:border-color .2s,color .2s}
+.addbtn:active{border-color:var(--dm);color:var(--tx)}
+
+/* ── OVERLAY + SHEET ─────────────────────── */
+#ovl{position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:99;opacity:0;pointer-events:none;transition:opacity .22s}
+#ovl.on{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:0;right:0;bottom:0;background:var(--s1);border-top:1px solid var(--bd);border-radius:26px 26px 0 0;z-index:100;transform:translateY(110%);transition:transform .3s cubic-bezier(.32,.72,0,1);padding:0 20px;padding-bottom:calc(20px + var(--sb));max-height:90vh;overflow-y:auto}
+#sheet::-webkit-scrollbar{display:none}
+#sheet.on{transform:translateY(0)}
+.shandle{width:40px;height:4px;background:var(--bd);border-radius:2px;margin:14px auto 16px}
+.strow{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.stico{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.stname{font-family:'Syne',sans-serif;font-size:20px;font-weight:800}
+
+/* ── QUICK ADD ───────────────────────────── */
+.qlbl{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px}
+.qlist{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.qitem{display:flex;align-items:center;background:var(--s2);border:1px solid var(--bd);border-radius:13px;padding:11px 14px;cursor:pointer;touch-action:manipulation;min-height:46px;transition:border-color .15s}
+.qitem:active{border-color:var(--dm)}
+.qiname{flex:1;font-size:14px;font-weight:500;color:var(--tx);margin-right:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.qicals{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;flex-shrink:0}
+.ordiv{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.ordiv::before,.ordiv::after{content:'';flex:1;height:1px;background:var(--bd)}
+.orlbl{font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.1em}
+
+/* ── FORM ────────────────────────────────── */
+.fg{margin-bottom:12px}
+.flbl{display:block;font-size:11px;font-weight:700;color:var(--mt);text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px}
+.finp{width:100%;background:var(--s2);border:1.5px solid var(--bd);border-radius:14px;padding:13px 15px;color:var(--tx);font-family:'Manrope',sans-serif;font-size:16px;font-weight:500;outline:none;transition:border-color .2s;-webkit-appearance:none;appearance:none}
+.finp::placeholder{color:var(--mt)}
+.finp:focus{border-color:var(--dm)}
+.finp.err{border-color:#ef4444}
+.hint{font-size:11px;color:var(--mt);margin-top:5px}
+.sbtn{width:100%;height:52px;margin-top:12px;background:var(--tx);border:none;border-radius:16px;color:var(--bg);font-family:'Syne',sans-serif;font-size:17px;font-weight:800;cursor:pointer;touch-action:manipulation;letter-spacing:.02em;transition:opacity .15s}
+.sbtn:active{opacity:.82}
+
+/* ── SECTION COLOR HELPERS ───────────────── */
+.cb{color:var(--cb)} .cl{color:var(--cl)} .cd{color:var(--cd)} .cs{color:var(--cs)} .cw{color:var(--cw)}
+.bgb{background:var(--cb-a)} .bgl{background:var(--cl-a)} .bgd{background:var(--cd-a)} .bgs{background:var(--cs-a)} .bgw{background:var(--cw-a)}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <div class="drow">
+      <button class="nbtn" onclick="shiftDay(-1)">‹</button>
+      <div class="dctr" onclick="goToday()" title="Tap to go to today">
+        <div class="dmain" id="dmain">—</div>
+        <div class="dsub"  id="dsub">—</div>
+      </div>
+      <button class="nbtn" onclick="shiftDay(1)">›</button>
+    </div>
+    <div class="tcard">
+      <div>
+        <div class="tnum" id="tnum">0</div>
+        <div class="tlbl">Net kcal</div>
+      </div>
+      <div class="tbd" id="tbd"></div>
+    </div>
+  </div>
+  <div id="scroll"></div>
+</div>
+
+<div id="ovl" onclick="closeSheet()"></div>
+<div id="sheet">
+  <div class="shandle"></div>
+  <div class="strow">
+    <div class="stico" id="shico"></div>
+    <div class="stname" id="shname"></div>
+  </div>
+  <div id="qarea"></div>
+  <div class="fg">
+    <label class="flbl" for="nin">Name</label>
+    <input class="finp" type="text" id="nin" placeholder="e.g. Chicken &amp; rice" autocomplete="off" autocorrect="off" autocapitalize="words" spellcheck="false">
+  </div>
+  <div class="fg">
+    <label class="flbl" for="cin">Calories</label>
+    <input class="finp" type="number" id="cin" placeholder="e.g. 420" inputmode="decimal">
+    <div class="hint" id="chint"></div>
+  </div>
+  <button class="sbtn" onclick="submitEntry()">Add Entry</button>
+</div>
+
+<script>
+(function(){
+  var SECS=[
+    {id:'breakfast',label:'Breakfast',emoji:'🌅',cc:'b'},
+    {id:'lunch',    label:'Lunch',    emoji:'🥗',cc:'l'},
+    {id:'dinner',   label:'Dinner',   emoji:'🍽️',cc:'d'},
+    {id:'snack',    label:'Snack',    emoji:'🍎',cc:'s'},
+    {id:'workout',  label:'Workout',  emoji:'💪',cc:'w'},
+  ];
+
+  var st={date:today(),sec:null,qi:[],col:{}};
+
+  /* ── DATE HELPERS ──────────────────────── */
+  function today(){
+    var d=new Date();
+    return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+  }
+  function p2(n){return String(n).padStart(2,'0')}
+  function shiftDate(s,n){
+    var pts=s.split('-').map(Number),d=new Date(pts[0],pts[1]-1,pts[2]);
+    d.setDate(d.getDate()+n);
+    return d.getFullYear()+'-'+p2(d.getMonth()+1)+'-'+p2(d.getDate());
+  }
+  function fmtMain(s){
+    var pts=s.split('-').map(Number);
+    return new Date(pts[0],pts[1]-1,pts[2]).toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+  }
+  function fmtRel(s){
+    var t=today();
+    if(s===t)return'Today';
+    if(s===shiftDate(t,-1))return'Yesterday';
+    if(s===shiftDate(t,1))return'Tomorrow';
+    var pts=s.split('-').map(Number),diff=Math.round((new Date()-(new Date(pts[0],pts[1]-1,pts[2])))/86400000);
+    if(diff>0)return diff+'d ago';
+    if(diff<0)return Math.abs(diff)+'d from now';
+    return'';
+  }
+
+  /* ── STORAGE ───────────────────────────── */
+  function loadDays(){try{return JSON.parse(localStorage.getItem('cals_days')||'{}')}catch(e){return{}}}
+  function saveDays(d){
+    var keys=Object.keys(d).sort();
+    while(keys.length>30)delete d[keys.shift()];
+    try{localStorage.setItem('cals_days',JSON.stringify(d))}catch(e){}
+  }
+  function loadHist(){try{return JSON.parse(localStorage.getItem('cals_hist')||'{}')}catch(e){return{}}}
+  function saveHist(h){try{localStorage.setItem('cals_hist',JSON.stringify(h))}catch(e){}}
+  function getDay(days,ds){
+    if(!days[ds]){days[ds]={}}
+    SECS.forEach(function(s){if(!days[ds][s.id])days[ds][s.id]=[]});
+    return days[ds];
+  }
+  function esc(s){
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  /* ── RENDER ────────────────────────────── */
+  function render(){
+    var days=loadDays(),day=getDay(days,st.date);
+    document.getElementById('dmain').textContent=fmtMain(st.date);
+    document.getElementById('dsub').textContent=fmtRel(st.date);
+
+    var food=0,burn=0;
+    SECS.forEach(function(s){
+      var t=(day[s.id]||[]).reduce(function(a,e){return a+(e.cals||0)},0);
+      if(s.id==='workout')burn+=t; else food+=t;
+    });
+    var net=food+burn;
+    var tn=document.getElementById('tnum');
+    tn.textContent=net.toLocaleString();
+    tn.style.color=net<0?'var(--cw)':'var(--tx)';
+
+    var lines=[];
+    if(food)lines.push('<span style="color:var(--cd)">'+food.toLocaleString()+' food</span>');
+    if(burn<0)lines.push('<span style="color:var(--cw)">'+Math.abs(burn).toLocaleString()+' burned</span>');
+    document.getElementById('tbd').innerHTML=lines.join('<br>');
+
+    var sc=document.getElementById('scroll');
+    sc.innerHTML='';
+    SECS.forEach(function(s){
+      var entries=day[s.id]||[];
+      var stot=entries.reduce(function(a,e){return a+(e.cals||0)},0);
+      var isOpen=!st.col[s.id];
+      var cc=s.cc;
+
+      var totStr=stot!==0
+        ?'<span class="stot c'+cc+'">'+stot.toLocaleString()+'</span>'
+        :'<span class="stot" style="color:var(--mt)">—</span>';
+
+      var entHtml=entries.length===0
+        ?'<div class="emsg">No entries yet</div>'
+        :entries.map(function(e,i){
+            return '<div class="erow">'
+              +'<span class="ename">'+esc(e.name)+'</span>'
+              +'<span class="ecals c'+cc+'">'+e.cals.toLocaleString()+'</span>'
+              +'<button class="dbtn" onclick="delE(\''+s.id+'\','+i+')" aria-label="Delete">✕</button>'
+              +'</div>';
+          }).join('');
+
+      var card=document.createElement('div');
+      card.className='scard';
+      card.innerHTML=
+        '<div class="shead" onclick="togSec(\''+s.id+'\')">'
+          +'<div class="sico bg'+cc+'">'+s.emoji+'</div>'
+          +'<span class="sname c'+cc+'">'+s.label+'</span>'
+          +totStr
+          +'<span class="schev '+(isOpen?'open':'')+'" id="chev-'+s.id+'">▶</span>'
+        +'</div>'
+        +'<div class="sbody '+(isOpen?'':'closed')+'" id="body-'+s.id+'">'
+          +'<div class="sdiv"></div>'
+          +entHtml
+          +'<div class="addrow">'
+            +'<button class="addbtn" onclick="openSheet(\''+s.id+'\')">'
+              +'<svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="7" y1="1" x2="7" y2="13"/><line x1="1" y1="7" x2="13" y2="7"/></svg>'
+              +' Add '+s.label
+            +'</button>'
+          +'</div>'
+        +'</div>';
+      sc.appendChild(card);
+    });
+  }
+
+  /* ── ACTIONS ───────────────────────────── */
+  window.shiftDay=function(n){st.date=shiftDate(st.date,n);render()};
+  window.goToday=function(){st.date=today();render()};
+  window.togSec=function(id){
+    st.col[id]=!st.col[id];
+    var b=document.getElementById('body-'+id),c=document.getElementById('chev-'+id);
+    if(b)b.classList.toggle('closed',!!st.col[id]);
+    if(c)c.classList.toggle('open',!st.col[id]);
+  };
+  window.delE=function(sid,i){
+    var days=loadDays(),day=getDay(days,st.date);
+    day[sid].splice(i,1);
+    saveDays(days);
+    render();
+  };
+
+  window.openSheet=function(sid){
+    st.sec=sid;
+    var s=SECS.find(function(x){return x.id===sid});
+    var cc=s.cc;
+    var shico=document.getElementById('shico');
+    shico.textContent=s.emoji;
+    shico.className='stico bg'+cc;
+    var shname=document.getElementById('shname');
+    shname.textContent='Add '+s.label;
+    shname.className='stname c'+cc;
+
+    var hint=document.getElementById('chint');
+    if(sid==='workout'){
+      hint.textContent='Enter a positive number — it will be counted as calories burned.';
+    } else {
+      hint.textContent='';
+    }
+
+    var hist=loadHist();
+    st.qi=(hist[sid]||[]).slice(0,5);
+    var qa=document.getElementById('qarea');
+    if(st.qi.length>0){
+      qa.innerHTML='<div class="qlbl">Recent</div>'
+        +'<div class="qlist">'
+        +st.qi.map(function(e,i){
+            return '<div class="qitem" onclick="quickAdd('+i+')">'
+              +'<span class="qiname">'+esc(e.name)+'</span>'
+              +'<span class="qicals c'+cc+'">'+e.cals.toLocaleString()+'</span>'
+              +'</div>';
+          }).join('')
+        +'</div>'
+        +'<div class="ordiv"><span class="orlbl">Or enter manually</span></div>';
+    } else {
+      qa.innerHTML='';
+    }
+
+    document.getElementById('nin').value='';
+    document.getElementById('cin').value='';
+    document.getElementById('nin').classList.remove('err');
+    document.getElementById('cin').classList.remove('err');
+    document.getElementById('ovl').classList.add('on');
+    document.getElementById('sheet').classList.add('on');
+    setTimeout(function(){document.getElementById('nin').focus()},340);
+  };
+
+  window.closeSheet=function(){
+    document.getElementById('ovl').classList.remove('on');
+    document.getElementById('sheet').classList.remove('on');
+    st.sec=null;
+  };
+
+  window.quickAdd=function(i){
+    var e=st.qi[i];
+    if(!e||!st.sec)return;
+    addEntry(st.sec,e.name,e.cals);
+    closeSheet();
+  };
+
+  window.submitEntry=function(){
+    var name=document.getElementById('nin').value.trim();
+    var rawC=document.getElementById('cin').value.trim();
+    var cals=parseInt(rawC,10);
+    var ok=true;
+    if(!name){document.getElementById('nin').classList.add('err');ok=false;}
+    else document.getElementById('nin').classList.remove('err');
+    if(!rawC||isNaN(cals)){document.getElementById('cin').classList.add('err');ok=false;}
+    else document.getElementById('cin').classList.remove('err');
+    if(!ok)return;
+    if(st.sec==='workout')cals=-Math.abs(cals);
+    addEntry(st.sec,name,cals);
+    closeSheet();
+  };
+
+  function addEntry(sid,name,cals){
+    var days=loadDays(),day=getDay(days,st.date);
+    day[sid].push({name:name,cals:cals});
+    saveDays(days);
+    var hist=loadHist();
+    if(!hist[sid])hist[sid]=[];
+    hist[sid]=hist[sid].filter(function(e){return!(e.name===name&&e.cals===cals)});
+    hist[sid].unshift({name:name,cals:cals});
+    hist[sid]=hist[sid].slice(0,30);
+    saveHist(hist);
+    render();
+  }
+
+  render();
+})();
+</script>
+</body>
+</html>
