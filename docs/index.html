@@ -246,7 +246,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     var lbl=document.querySelector('.tlbl');
 
     if(!isNaN(budget)&&budget>0){
-      var remaining=budget-food+burn; // food is consumed, burn is negative so +burn = subtracted
+      var remaining=budget-food+Math.abs(burn);
       tn.textContent=remaining.toLocaleString();
       tn.style.color=remaining<0?'var(--red)':remaining===0?'var(--cl)':'var(--tx)';
       lbl.textContent='kcal remaining';
@@ -396,7 +396,7 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     shname.textContent='Daily Budget';
     shname.className='stname cw';
 
-    document.getElementById('qarea').innerHTML='';
+    document.getElementById('qarea').innerHTML='<div style="text-align:right;margin-bottom:4px"><button onclick="forceRefresh()" style="background:none;border:none;color:var(--accent);font-size:13px;font-weight:600;font-family:-apple-system,sans-serif;cursor:pointer;padding:4px 0">Force Refresh ↻</button></div>';
     document.getElementById('nin').value='';
     document.getElementById('nin').parentElement.style.display='none';
 
@@ -408,9 +408,14 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--tx);font-
     var hint=document.getElementById('chint');
     hint.textContent='Set your daily calorie target. Leave blank to remove.';
 
+    document.getElementById('sbtn').textContent='Save';
     document.getElementById('ovl').classList.add('on');
     document.getElementById('sheet').classList.add('on');
     setTimeout(function(){cin.focus()},340);
+  };
+
+  window.forceRefresh=function(){
+    location.reload(true);
   };
 
   function submitBudget(){
